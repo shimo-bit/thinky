@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Thinky</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      /* Palette */
+      --bg-color: #030303;
+      --card-bg: rgba(20, 20, 20, 0.6);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --input-bg: rgba(0, 0, 0, 0.3);
+
+      --accent: #00ffa3;
+      /* Neon Mint */
+      --accent-dim: rgba(0, 255, 163, 0.1);
+
+      --folder: #ffd700;
+      /* Gold */
+
+      --text-main: #ededed;
+      --text-muted: #888888;
+
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      background-image: radial-gradient(circle at 50% 10%, #111e18 0%, #030303 60%);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    /* CUSTOM SCROLLBAR (Requested Style) */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-color);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--text-muted);
+      /* "Word text colour" (muted variant for balance) */
+      border-radius: 5px;
+      border: 2px solid var(--bg-color);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-main);
+    }
+
+
+    .layout {
+      width: 100%;
+      max-width: 700px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* HEADER & BREADCRUMBS */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      color: var(--text-muted);
+      overflow-x: auto;
+      white-space: nowrap;
+      padding-bottom: 4px;
+      flex: 1;
+    }
+
+    .brand {
+      color: var(--accent);
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .crumb {
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .crumb:hover {
+      color: var(--text-main);
+    }
+
+    .separator {
+      opacity: 0.3;
+    }
+
+    /* EDITOR PANEL */
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 24px;
+      backdrop-filter: blur(12px);
+    }
+
+    .panel-header {
+      margin-bottom: 16px;
+      font-size: 14px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .current-location {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 12px;
+    }
+
+    .tab {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-weight: 500;
+      padding: 4px 0;
+      transition: color 0.2s;
+    }
+
+    .tab.active {
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+    }
+
+    .input-row {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    input,
+    textarea {
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 14px;
+      border-radius: 8px;
+      font-family: inherit;
+      outline: none;
+      width: 100%;
+    }
+
+    textarea {
+      min-height: 100px;
+      font-family: 'JetBrains Mono', monospace;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .btn-create {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: opacity 0.2s;
+    }
+
+    .btn-create:hover {
+      opacity: 0.9;
+    }
+
+    /* ITEMS LIST */
+    .grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid transparent;
+      padding: 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      justify-content: space-between;
+    }
+
+    .item:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.1);
+      transform: translateX(4px);
+    }
+
+    .item-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .icon {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .folder-icon {
+      color: var(--folder);
+    }
+
+    .note-icon {
+      color: var(--accent);
+    }
+
+    .item-info {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .item-title {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-preview {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-actions {
+      display: flex;
+      gap: 8px;
+      opacity: 0.4;
+      transition: opacity 0.2s;
+    }
+
+    .item:hover .item-actions {
+      opacity: 1;
+    }
+
+    .action-btn {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .action-btn:hover {
+      color: #fff;
+      border-color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .delete-btn:hover {
+      color: #ff4d4d;
+      border-color: #ff4d4d;
+      background: rgba(255, 77, 77, 0.1);
+    }
+
+    /* MODAL */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal.open {
+      display: flex;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-box {
+      background: #0a0a0a;
+      border: 1px solid #333;
+      width: 100%;
+      max-width: 800px;
+      height: 80vh;
+      border-radius: 24px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 50px 100px rgba(0, 0, 0, 0.8);
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #222;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-content {
+      flex: 1;
+      padding: 40px;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #ddd;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #222;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title-input {
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--accent);
+      width: 100%;
+    }
+
+    .modal-body-input {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      border: none;
+      resize: none;
+      color: #ddd;
+      font-size: 16px;
+      line-height: 1.6;
+      padding: 0;
+    }
+
+    /* SETTINGS MODAL */
+    .settings-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 150;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .settings-box {
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 16px;
+      padding: 30px;
+      width: 400px;
+      max-width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .settings-btn {
+      background: #222;
+      color: #fff;
+      border: 1px solid #444;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 10px 0;
+      width: 100%;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .settings-btn:hover {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    /* LOGIN SCREEN MODAL */
+    #loginScreen {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .shake {
+      animation: shake 0.4s cubic-bezier(.36, .07, .19, .97) both;
+    }
+
+    @keyframes shake {
+
+      10%,
+      90% {
+        transform: translate3d(-1px, 0, 0);
+      }
+
+      20%,
+      80% {
+        transform: translate3d(2px, 0, 0);
+      }
+
+      30%,
+      50%,
+      70% {
+        transform: translate3d(-3px, 0, 0);
+      }
+
+      40%,
+      60% {
+        transform: translate3d(3px, 0, 0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- LOGIN SCREEN -->
+  <div id="loginScreen">
+    <div style="text-align:center; max-width:300px;">
+      <h1 style="color:var(--accent); font-family:'JetBrains Mono'; margin-bottom:20px;">Thinky Locked</h1>
+
+      <label style="display:block; text-align:left; color:#666; font-size:12px; margin-bottom:4px;">Username</label>
+      <input type="text" id="loginUser" placeholder="admin"
+        style="background:#111; border:1px solid #333; padding:12px; color:#fff; width:100%; border-radius:8px; outline:none; text-align:center; font-size:16px; margin-bottom:12px;">
+
+      <label style="display:block; text-align:left; color:#666; font-size:12px; margin-bottom:4px;">Password</label>
+      <input type="password" id="loginPass" placeholder="admin"
+        style="background:#111; border:1px solid #333; padding:12px; color:#fff; width:100%; border-radius:8px; outline:none; text-align:center; font-size:16px;">
+
+      <p id="loginError" style="color:red; font-size:12px; margin-top:10px; display:none;">Incorrect Credentials</p>
+      <button onclick="attemptLogin()"
+        style="margin-top:20px; background:var(--accent); border:none; padding:10px 30px; border-radius:8px; font-weight:600; cursor:pointer;">Unlock</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- TOP BAR with Header and Settings -->
+    <div class="top-bar">
+      <div class="header" id="breadcrumbs"></div>
+      <button class="action-btn" onclick="openSettings()" title="Settings & Backup" style="border:none;">⚙</button>
+    </div>
+
+    <!-- CREATE PANEL -->
+    <div class="panel">
+      <div class="panel-header">
+        <div id="locationLabel">Creating in: <span class="current-location">Home</span></div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" id="tabNote" onclick="setMode('note')">New Note</button>
+        <button class="tab" id="tabFolder" onclick="setMode('folder')">New Folder</button>
+      </div>
+
+      <div class="input-row">
+        <input id="inputTitle" placeholder="Title..." autocomplete="off">
+        <textarea id="inputContent" placeholder="Write your thoughts..."></textarea>
+
+        <!-- IMAGE UPLOAD UI -->
+        <div id="uploaderArea" style="display:flex; align-items:center; gap:10px; padding-top:4px;">
+          <input type="file" id="hiddenFileInput" accept="image/*" style="display:none;"
+            onchange="handleImageSelect(this)">
+          <button onclick="triggerImageUpload()" title="Attach Image"
+            style="background:transparent; border:1px solid var(--card-border); color:var(--accent); width:32px; height:32px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px;">📎</button>
+          <span style="font-size:12px; color:var(--text-muted);">Attach Image</span>
+        </div>
+        <img id="imagePreview" src=""
+          style="display:none; max-height:160px; border-radius:8px; object-fit:contain; align-self:flex-start; border:1px solid var(--card-border);">
+      </div>
+
+      <button class="btn-create" onclick="createItem()">Capture</button>
+    </div>
+
+    <!-- LIST -->
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <!-- FULL SCREEN MODAL -->
+  <div class="modal" id="noteModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <input class="modal-title-input" id="editTitle" placeholder="Note Title">
+        <button class="action-btn" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-content">
+        <div id="editImageArea"></div> <!-- Image displayed here -->
+        <textarea class="modal-body-input" id="editContent" placeholder="Write something..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn delete-btn" onclick="deleteInfoModal()">🗑 Delete</button>
+        <button class="btn-create" style="margin:0" onclick="saveEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="settings-modal" id="settingsModal"
+    onclick="document.getElementById('settingsModal').style.display='none'">
+    <div class="settings-box" onclick="event.stopPropagation()">
+      <h2 style="margin-bottom:20px; color:var(--text-main);">Settings</h2>
+      <p style="color:#888; font-size:14px; margin-bottom:24px; line-height:1.5;">
+        Thinky runs safely in your browser.<br>Export your data regularly to keep it safe.
+      </p>
+      <button class="settings-btn" onclick="exportData()">⬇ Export Backup (JSON)</button>
+
+      <div style="position:relative; margin-top:10px;">
+        <button class="settings-btn" style="background:transparent; border:1px dashed #555;">⬆ Import Backup</button>
+        <input type="file" id="importFile" onchange="importData(this)"
+          style="position:absolute; inset:0; opacity:0; cursor:pointer;">
+      </div>
+      <div style="margin-top:20px; font-size:12px; color:#555;">v2.5 &bull; Free Forever</div>
+    </div>
+  </div>
+
+  <script>
+    // --- AUTH CONFIG ---
+    const SESSION_DURATION = 3 * 60 * 60 * 1000; // 3 hours
+    const DEFAULT_USER = "admin";
+    const DEFAULT_PASS = "admin";
+
+    // STATE
+    let items = JSON.parse(localStorage.getItem('thinkyData') || "[]");
+    let currentFolderId = null; // null = root
+    let createMode = 'note'; // 'note' | 'folder'
+    let editingId = null;
+    let currentImageBase64 = null; // Temp holder for new note image
+
+    // DOM
+    const grid = document.getElementById('grid');
+    const breadcrumbs = document.getElementById('breadcrumbs');
+    const locationLabel = document.getElementById('locationLabel');
+
+    const inputTitle = document.getElementById('inputTitle');
+    const inputContent = document.getElementById('inputContent');
+    const imagePreview = document.getElementById('imagePreview');
+    const inputUploaderArea = document.getElementById('uploaderArea');
+
+    const modal = document.getElementById('noteModal');
+    const editTitle = document.getElementById('editTitle');
+    const editContent = document.getElementById('editContent');
+
+    const settingsModal = document.getElementById('settingsModal');
+    const loginScreen = document.getElementById('loginScreen');
+
+    // INIT
+    checkSession();
+
+    // AUTH LOGIC
+    function checkSession() {
+      const lastLogin = localStorage.getItem('thinkySession');
+      const now = Date.now();
+
+      if (lastLogin && (now - parseInt(lastLogin) < SESSION_DURATION)) {
+        loginScreen.style.display = 'none';
+        render();
+      } else {
+        loginScreen.style.display = 'flex';
+      }
+    }
+
+    function attemptLogin() {
+      const u = document.getElementById('loginUser').value;
+      const p = document.getElementById('loginPass').value;
+
+      if (u === DEFAULT_USER && p === DEFAULT_PASS) {
+        localStorage.setItem('thinkySession', Date.now());
+        loginScreen.style.display = 'none';
+        render();
+      } else {
+        const err = document.getElementById('loginError');
+        err.style.display = 'block';
+        err.classList.add('shake');
+        setTimeout(() => err.classList.remove('shake'), 400);
+      }
+    }
+
+    document.getElementById('loginPass').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') attemptLogin();
+    });
+
+    // IMAGE HANDLING
+    function triggerImageUpload() {
+      document.getElementById('hiddenFileInput').click();
+    }
+
+    function handleImageSelect(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      // Simple size check (2MB limit for localStorage sanity)
+      if (file.size > 2 * 1024 * 1024) {
+        alert("Please use an image smaller than 2MB.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        currentImageBase64 = e.target.result;
+        // Show preview
+        imagePreview.style.display = 'block';
+        imagePreview.src = currentImageBase64;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removePreviewImage() {
+      currentImageBase64 = null;
+      imagePreview.src = "";
+      imagePreview.style.display = 'none';
+      document.getElementById('hiddenFileInput').value = "";
+    }
+
+    // ACTIONS
+    function setMode(mode) {
+      createMode = mode;
+      document.getElementById('tabNote').classList.toggle('active', mode === 'note');
+      document.getElementById('tabFolder').classList.toggle('active', mode === 'folder');
+
+      inputContent.style.display = mode === 'folder' ? 'none' : 'block';
+      // Hide image tools for folders
+      inputUploaderArea.style.display = mode === 'folder' ? 'none' : 'flex';
+      if (mode === 'folder') imagePreview.style.display = 'none';
+      else if (currentImageBase64) imagePreview.style.display = 'block';
+
+      inputTitle.placeholder = mode === 'folder' ? 'Folder Name...' : 'Note Title...';
+    }
+
+    function createItem() {
+      const title = inputTitle.value.trim();
+      const content = inputContent.value.trim();
+
+      if (!title && !content && !currentImageBase64) return;
+
+      const newItem = {
+        id: Date.now().toString(),
+        parentId: currentFolderId,
+        type: createMode,
+        title: title || (createMode === 'folder' ? "Untitled Folder" : "Untitled Note"),
+        content: content,
+        image: createMode === 'note' ? currentImageBase64 : null,
+        timestamp: Date.now()
+      };
+
+      items.unshift(newItem);
+      saveData();
+
+      // Reset Inputs
+      inputTitle.value = "";
+      inputContent.value = "";
+      removePreviewImage();
+
+      // UX: Automatically flip back to Note mode if we made a folder
+      if (createMode === 'folder') {
+        setMode('note');
+      }
+
+      render();
+    }
+
+    function enterFolder(id) {
+      currentFolderId = id;
+      render();
+    }
+
+    function goUp(id) {
+      currentFolderId = id; // id can be null
+      render();
+    }
+
+    function openNote(id) {
+      const item = items.find(i => i.id === id);
+      if (!item) return;
+
+      editingId = id;
+      editTitle.value = item.title;
+      editContent.value = item.content || "";
+
+      // Show image in modal if exists
+      const imgCont = document.getElementById('editImageArea');
+      if (item.image) {
+        imgCont.innerHTML = `<img src="${item.image}" style="max-height:400px; max-width:100%; border-radius:8px; margin-bottom:20px; display:block;">`;
+      } else {
+        imgCont.innerHTML = "";
+      }
+
+      modal.classList.add('open');
+    }
+
+    function closeModal() {
+      modal.classList.remove('open');
+      editingId = null;
+    }
+
+    function saveEdit() {
+      if (!editingId) return;
+      const item = items.find(i => i.id === editingId);
+      if (item) {
+        item.title = editTitle.value;
+        item.content = editContent.value;
+        saveData();
+        render();
+      }
+      closeModal();
+    }
+
+    function deleteInfoModal() {
+      if (!editingId) return;
+      if (confirm('Delete this note?')) {
+        items = items.filter(i => i.id !== editingId);
+        saveData();
+        render();
+        closeModal();
+      }
+    }
+
+    function deleteItem(e, id) {
+      e.stopPropagation();
+      if (confirm('Delete this item?')) {
+        const idsToDelete = [id];
+        let changed = true;
+        while (changed) {
+          changed = false;
+          items.forEach(i => {
+            if (idsToDelete.includes(i.parentId) && !idsToDelete.includes(i.id)) {
+              idsToDelete.push(i.id);
+              changed = true;
+            }
+          });
+        }
+        items = items.filter(i => !idsToDelete.includes(i.id));
+        saveData();
+        render();
+      }
+    }
+
+    // SETTINGS & BACKUP
+    function openSettings() {
+      settingsModal.style.display = 'flex';
+    }
+
+    function exportData() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(items));
+      const downloadAnchorNode = document.createElement('a');
+      downloadAnchorNode.setAttribute("href", dataStr);
+      downloadAnchorNode.setAttribute("download", "thinky_backup_" + new Date().toISOString().slice(0, 10) + ".json");
+      document.body.appendChild(downloadAnchorNode);
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
+    }
+
+    function importData(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (Array.isArray(imported)) {
+            if (confirm("Merge imported notes?")) {
+              items = [...items, ...imported];
+              saveData();
+              render();
+              settingsModal.style.display = 'none';
+            }
+          }
+        } catch (err) { alert("Invalid backup file."); }
+      };
+      reader.readAsText(file);
+    }
+
+    // RENDER
+    function render() {
+      let folderName = "Home";
+      if (currentFolderId) {
+        const f = items.find(i => i.id === currentFolderId);
+        if (f) folderName = f.title;
+      }
+
+      locationLabel.innerHTML = `Creating in: <span class="current-location">${escapeHtml(folderName)}</span>`;
+      renderBreadcrumbs();
+
+      grid.innerHTML = "";
+      const currentItems = items.filter(i => i.parentId === currentFolderId);
+
+      currentItems.sort((a, b) => {
+        if (a.type === b.type) return b.timestamp - a.timestamp;
+        return a.type === 'folder' ? -1 : 1;
+      });
+
+      if (currentItems.length === 0) {
+        grid.innerHTML = `<div style="text-align:center; color:#555; padding:40px;">Empty folder</div>`;
+        return;
+      }
+
+      currentItems.forEach(item => {
+        const el = document.createElement('div');
+        el.className = 'item';
+
+        // Icon Logic: Folder = 📁, Image Note = 🖼️, Text Note = (Empty)
+        const icon = item.type === 'folder' ? '📁' : (item.image ? '🖼️' : '');
+        const cssClass = item.type === 'folder' ? 'folder-icon' : 'note-icon';
+        const preview = item.type === 'folder'
+          ? `${countChildren(item.id)} items`
+          : (item.content ? item.content.substring(0, 30) + "..." : "No preview");
+
+        let imageThumb = "";
+        if (item.image) {
+          imageThumb = `<div style="width:40px; height:40px; background:url('${item.image}') center/cover no-repeat; border-radius:6px; margin-right:12px; flex-shrink:0;"></div>`;
+        }
+
+        // Only render icon span if there is an icon
+        const iconHtml = icon ? `<span class="icon ${cssClass}">${icon}</span>` : '';
+
+        el.innerHTML = `
+          <div class="item-left">
+            ${item.image ? imageThumb : iconHtml}
+            <div class="item-info">
+              <span class="item-title">${escapeHtml(item.title)}</span>
+              <span class="item-preview">${escapeHtml(preview)}</span>
+            </div>
+          </div>
+          <div class="item-actions">
+             <button class="action-btn delete-btn" title="Delete" onclick="deleteItem(event, '${item.id}')">🗑</button>
+             ${item.type === 'note' ? `<button class="action-btn" title="Edit" onclick="openNote('${item.id}'); event.stopPropagation();">✎</button>` : ''}
+          </div>
+        `;
+
+        el.onclick = item.type === 'folder' ? () => enterFolder(item.id) : () => openNote(item.id);
+        grid.appendChild(el);
+      });
+    }
+
+    function renderBreadcrumbs() {
+      breadcrumbs.innerHTML = `<span class="brand" onclick="goUp(null)">Thinky</span>`;
+      let path = [];
+      let curr = items.find(i => i.id === currentFolderId);
+      while (curr) {
+        path.unshift(curr);
+        curr = items.find(i => i.id === curr.parentId);
+      }
+      path.forEach(folder => {
+        breadcrumbs.innerHTML += `
+          <span class="separator">/</span>
+          <span class="crumb" onclick="goUp('${folder.id}')">${escapeHtml(folder.title)}</span>
+        `;
+      });
+    }
+
+    function countChildren(folderId) {
+      return items.filter(i => i.parentId === folderId).length;
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem('thinkyData', JSON.stringify(items));
+      } catch (e) {
+        alert("Storage Full! Delete some items or remove large images.");
+      }
+    }
+
+    function escapeHtml(text) {
+      if (!text) return "";
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+  </script>
+</body>
+
+</html>
